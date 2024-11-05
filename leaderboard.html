@@ -30,6 +30,11 @@
             color: #50818e;
             vertical-align: middle;
         }
+        .percentage {
+            margin-left: 5px;
+            font-weight: bold; 
+            color: rgb(34, 62, 146); 
+        }
         .table .country {
             font-weight: bold;
         }
@@ -42,7 +47,7 @@
             padding: 5px;
             font-size: 16px;
         }
-        #country-filter {
+        #country-filter #specialty-filter {
             border: 1px solid #c1cdd1;
             border-radius: 5px;
             padding: 8px 12px;
@@ -53,12 +58,12 @@
             transition: all 0.3s ease;
         }
 
-        #country-filter:focus {
+        #country-filter:focus #specialty-filter:focus {
             border-color: #234263;
             box-shadow: 0 0 5px rgba(43, 66, 88, 0.5);
         }
 
-        .filter-container label {
+        .filter-container label .specialty-filter label {
             font-weight: 600;
             color: #333;
             margin-right: 8px;
@@ -74,9 +79,13 @@
         <!-- 右上角过滤条容器 -->
         <div class="d-flex justify-content-end mb-3">
             <label for="country-filter" class="mr-2 align-self-center">Filter by:</label>
-            <select id="country-filter" class="form-control" style="width: 200px;">
+            <select id="country-filter" class="form-control mr-2" style="width: 150px;">
                 <option value="">Country</option>
                 <!-- 动态生成国家选项 -->
+            </select>
+            <select id="specialty-filter" class="form-control" style="width: 200px;">
+                <option value="">Specialty</option>
+                <!-- 动态生成专业选项 -->
             </select>
         </div>
     
@@ -108,27 +117,41 @@
         .then(response => response.json())
         .then(leaderboardData => {
             // 填充数据到表格中
-            console.log(leaderboardData)
             const tbody = $("#leaderboard-body");
             leaderboardData.forEach(item => {
                 const row = `
                     <tr>
                         <td>${item.rank}</td>
-                        <td>${item.name}</td>
-                        <td>${'s'}</td>
-                        <td class="country">${item.country}</td>
+                        <td>
+                            <a href="https://github.com/${item.name}" target="_blank">${item.name}</a>   
+                        </td>
+                        <td>
+                            <a href="https://github.com/${item.name}" target="_blank">主页</a>
+                        </td>
+                        <td class="country">
+                            ${item.country} 
+                            <span class="percentage">${item.percentage}%</span>
+                        </td>
                         <td>${Math.round(item.score * 10000)}</td>
                     </tr>
                 `;
                 tbody.append(row);
             });
 
-            // 获取唯一的国家并添加到下拉菜单
             const countries = [...new Set(leaderboardData.map(item => item.country))];
             countries.forEach(country => {
                 $("#country-filter").append(`<option value="${country}">${country}</option>`);
             });
-
+            const specialties = leaderboardData.reduce((acc, item) => {
+                for (const it of item['specialty']) {
+                    acc.add(it);
+                }
+                return acc;
+            }, new Set());
+            
+            specialties.forEach(specialty => {
+                $("#specialty-filter").append(`<option value="${specialty}">${specialty}</option>`);
+            });
             // 初始化 DataTables 插件
             const table = $('#leaderboard-table').DataTable({
                 paging: true,
@@ -144,7 +167,6 @@
                 const selectedCountry = $(this).val();
                 filterByCountry(selectedCountry);
             });
-
             // 定义过滤函数
             function filterByCountry(country) {
                 if (country) {
@@ -152,6 +174,38 @@
                 } else {
                     table.column(3).search("").draw();
                 }
+            }
+            $('#specialty-filter').on('change', function(e) {
+                const selectedCountry = $('#country-filter').val();
+                const selectedSpecialty = $(this).val();
+                filterTable(selectedCountry, selectedSpecialty);
+            });
+
+            // 定义过滤函数，重新获取数据并更新表格
+            function filterTable(country, specialty) {
+                // 发送请求到后端 API
+                fetch(`http://localhost:8000/api/data?specialty=${specialty || ''}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // 清空表格数据
+                        table.clear();
+
+                        // 填充新数据到表格中
+                        data.forEach(item => {
+                            table.row.add([
+                                item.rank,
+                                item.name,
+                                's',
+                                item.country,
+                                Math.round(item.score * 10000),
+                                item.specialty
+                            ]);
+                        });
+
+                        // 重绘表格以显示新数据
+                        table.draw();
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
             }
         })
         .catch(error => console.error('Error fetching data:', error));

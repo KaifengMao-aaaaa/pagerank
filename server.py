@@ -18,12 +18,44 @@ def home():
 def get_data():
     conn = psycopg2.connect(**db_config)
     cursor = conn.cursor()
-    cursor.execute("SELECT ROW_NUMBER() OVER (ORDER BY score DESC) AS rank, name, score, country FROM developers;")
+    specialty = request.args.get('specialty') 
+    if specialty:
+        cursor.execute("""
+            SELECT rank, d.name, score, country, r.name as specialty
+            FROM developer_rankings d
+            join research_view r
+            on r.developer_name = d.name
+            WHERE r.name = %s;
+        """, (specialty,))
+    else:
+        cursor.execute("""
+            SELECT rank, d.name, score, country, r.name as specialty
+            FROM developer_rankings d
+            join research_view r
+            on r.developer_name = d.name;
+        """)
+    # 创建一个字典以便按开发者名称聚合 specialties
+    data_dict = {}
+    rows = cursor.fetchall()
+    for row in rows:
+        rank, name, score, country, specialty = row
+        if name not in data_dict:
+            data_dict[name] = {
+                'rank': rank,
+                'name': name,
+                'score': score,
+                'country': country,
+                'specialty': [specialty]  # 初始化为列表
+            }
+        else:
+            data_dict[name]['specialty'].append(specialty)  # 添加 specialty
+
+    # 将字典转换为列表格式
+    data = list(data_dict.values())
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
 
-    data = [{'rank': row[0], "name": row[1], "score": row[2], "country": row[3]} for row in rows]
     return jsonify(data)
 
 # 启动服务器
