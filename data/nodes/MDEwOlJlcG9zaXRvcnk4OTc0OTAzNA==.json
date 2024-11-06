@@ -1,0 +1,7 @@
+{
+    "id": "MDEwOlJlcG9zaXRvcnk4OTc0OTAzNA==",
+    "type": "project",
+    "attributes": {
+        "name": "rabbitmq-forge-boshrelease"
+    }
+}

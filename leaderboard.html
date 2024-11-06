@@ -193,7 +193,7 @@
                             table.row.add([
                                 item.rank,
                                 `<a href="https://github.com/${item.name}" target="_blank">${item.name}</a>`,
-                                `<a href="https://github.com/${item.name}" target="_blank">Profile</a>`,
+                                `<td><a href="developer.html?username=${item.name}" target="_blank">Profile</a></td>`,
                                 `${item.country} <span class="percentage">(${item.country_trust}%)</span>`,
                                 Math.round(item.score * 10000)
                             ]);

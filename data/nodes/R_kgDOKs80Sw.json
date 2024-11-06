@@ -1,0 +1,7 @@
+{
+    "id": "R_kgDOKs80Sw",
+    "type": "project",
+    "attributes": {
+        "name": "heroku-buildpack-awscli"
+    }
+}
