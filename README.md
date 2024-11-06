@@ -93,13 +93,13 @@ data/
 # 前端
 ![图片描述](./img/display.png)
 ## Demo
-基础功能
+[基础功能](./img/基础功能.mp4)
 <video src="./img/基础功能.mp4" controls></video>
-用户页面整理功能
+[用户页面整理功能](./img/整理页面.mp4)
 <video src="./img/整理页面.mp4" controls></video>
 
-#后端
-数据展示
+# 后端
+[数据展示](./img/数据.mp4)
 <video src="./img/数据.mp4" controls></video>
 
 更多数据可以通过运行`fetch.py`获取
