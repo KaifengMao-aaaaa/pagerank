@@ -1,1 +1,0 @@
-This is a sample sentence that I want to write into HDFS.

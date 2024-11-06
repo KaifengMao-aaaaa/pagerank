@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Profile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* 样式可根据需求调整 */
+        .profile-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0px 4px 10px rgba(34, 132, 237, 0.3);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="profile-container" id="profile-container">
+            <h3 class="text-center">Developer Profile</h3>
+            <div id="profile-content">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get("username");
+            if (username) {
+                fetch(`http://localhost:8000/api/dev_info?username=${encodeURIComponent(username)}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => response.json())
+                .then(data => displayProfile(data))
+                .catch(error => console.error('Error fetching developer info:', error));
+            } else {
+                document.getElementById("profile-content").innerText = "No username provided.";
+            }
+        });
+
+        function displayProfile(data) {
+            const profileContainer = document.getElementById("profile-content");
+            profileContainer.innerHTML = data;
+        }
+    </script>
+</body>
+</html>

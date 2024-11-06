@@ -1,0 +1,1 @@
+spark-submit --packages graphframes:graphframes:0.8.2-spark3.0-s_2.12 pagerank.py
